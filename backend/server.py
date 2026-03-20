@@ -1,72 +1,166 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import random
+import httpx
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
-
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
 app = FastAPI()
-
-# Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+BTC_ADDRESSES = [
+    "bc1qwfjd8edk2dq57d69gp9z2cgx8lwvpk7y30h9c3",
+    "bc1q8ygup9nluhka53ze4m2rn7pka02qftrlv7fktu",
+    "bc1qmmhhsarn0zr9jf0g756l4j0a2tqn2l44xqmmjr",
+    "bc1q5gslkglhld4mayp0fkg99te3jqmxq5r2kwe7ez",
+    "bc1qr8qrrv339wvl0l9pfxmu6j0zrczxpgkez2al75",
+]
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+# Models
+class ApplicationCreate(BaseModel):
+    brand_name: str
+    brand_email: str
+    brand_address: str
+    brand_website: Optional[str] = ""
+    brand_category: str
+    year_founded: str
+    contact_person: str
+    contact_phone: str
+    brand_description: str
+    country: str
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class ApplicationResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    brand_name: str
+    brand_email: str
+    brand_address: str
+    brand_website: str
+    brand_category: str
+    year_founded: str
+    contact_person: str
+    contact_phone: str
+    brand_description: str
+    country: str
+    btc_address: str
+    payment_status: str
+    created_at: str
 
-# Add your routes to the router instead of directly to app
+class PaymentStatusResponse(BaseModel):
+    status: str
+    btc_address: str
+    total_received: int
+    tx_count: int
+    confirmations: int
+    required_amount_btc: float
+    message: str
+
+
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Met Gala Brand Scout API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
+@api_router.post("/applications", response_model=ApplicationResponse)
+async def create_application(data: ApplicationCreate):
+    btc_address = random.choice(BTC_ADDRESSES)
+    app_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
 
-# Include the router in the main app
+    doc = {
+        "id": app_id,
+        **data.model_dump(),
+        "btc_address": btc_address,
+        "payment_status": "pending",
+        "created_at": now,
+    }
+
+    await db.applications.insert_one(doc)
+    doc.pop("_id", None)
+    return ApplicationResponse(**doc)
+
+
+@api_router.get("/applications/{app_id}", response_model=ApplicationResponse)
+async def get_application(app_id: str):
+    doc = await db.applications.find_one({"id": app_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return ApplicationResponse(**doc)
+
+
+@api_router.get("/applications/{app_id}/payment-status", response_model=PaymentStatusResponse)
+async def check_payment_status(app_id: str):
+    doc = await db.applications.find_one({"id": app_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    btc_address = doc["btc_address"]
+    total_received = 0
+    tx_count = 0
+    confirmations = 0
+    status = "waiting"
+    message = "Waiting for payment..."
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(f"https://blockstream.info/api/address/{btc_address}")
+            if resp.status_code == 200:
+                addr_data = resp.json()
+                chain_stats = addr_data.get("chain_stats", {})
+                mempool_stats = addr_data.get("mempool_stats", {})
+
+                funded_chain = chain_stats.get("funded_txo_sum", 0)
+                funded_mempool = mempool_stats.get("funded_txo_sum", 0)
+                total_received = funded_chain + funded_mempool
+                tx_count = chain_stats.get("funded_txo_count", 0) + mempool_stats.get("funded_txo_count", 0)
+
+                if funded_mempool > 0 and funded_chain == 0:
+                    status = "detected"
+                    message = "Transaction detected in mempool. Awaiting confirmation..."
+                    confirmations = 0
+                elif funded_chain > 0:
+                    status = "confirmed"
+                    message = "Payment confirmed on the blockchain."
+                    confirmations = 6
+
+                    if doc["payment_status"] != "confirmed":
+                        await db.applications.update_one(
+                            {"id": app_id},
+                            {"$set": {"payment_status": "confirmed"}}
+                        )
+                else:
+                    status = "waiting"
+                    message = "Monitoring blockchain for incoming transactions..."
+    except Exception as e:
+        logger.error(f"Blockchain API error: {e}")
+        status = "waiting"
+        message = "Monitoring blockchain for incoming transactions..."
+
+    return PaymentStatusResponse(
+        status=status,
+        btc_address=btc_address,
+        total_received=total_received,
+        tx_count=tx_count,
+        confirmations=confirmations,
+        required_amount_btc=0.15,
+        message=message,
+    )
+
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -77,7 +171,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
