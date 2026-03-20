@@ -99,9 +99,20 @@ export default function PaymentPage() {
     return () => clearInterval(pollingRef.current);
   }, [application, appId, paymentStatus, navigate, addLog]);
 
-  const copyAddress = () => {
+  const copyAddress = async () => {
     if (!application) return;
-    navigator.clipboard.writeText(application.btc_address);
+    try {
+      await navigator.clipboard.writeText(application.btc_address);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = application.btc_address;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
     setCopied(true);
     addLog("BTC address copied to clipboard.", "info");
     setTimeout(() => setCopied(false), 2000);
