@@ -1,0 +1,120 @@
+{
+  "theme": "dark",
+  "typography": {
+    "fonts": {
+      "heading": "Cormorant Garamond",
+      "body": "Montserrat",
+      "mono": "JetBrains Mono"
+    },
+    "rules": {
+      "headlines": "Massive sizes (text-5xl to text-9xl), tracking-tighter, font-light or font-medium. Never use Inter or generic sans for headings.",
+      "body": "Clean, readable, leading-relaxed, text-base to text-lg.",
+      "overline": "Uppercase, tiny (text-xs), wide spacing (tracking-[0.2em]), often in gold or bronze.",
+      "mono": "Use for the Bitcoin address, live transaction logs, and the countdown timer numbers to give a precise, technical yet luxurious feel."
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": "#050505",
+      "surface": "#0F0F0F",
+      "surface_elevated": "#1A1A1A",
+      "primary": "#C5A059",
+      "primary_hover": "#DBC080",
+      "secondary": "#CD7F32",
+      "text_primary": "#F5F5F0",
+      "text_secondary": "#A1A1A1",
+      "border": "#2A2A2A",
+      "border_gold": "rgba(197, 160, 89, 0.3)",
+      "success": "#4CAF50",
+      "error": "#E53935"
+    },
+    "rules": {
+      "general": "Dark luxurious theme. No pure blacks (#000000) - use #050505. No purple gradients.",
+      "accents": "Use Burnished Gold and Bronze exclusively for borders, thin lines (1px), small text overlines, and primary buttons.",
+      "gradients": "Avoid heavy, saturated gradients. If needed, use very subtle radial glows (e.g., a faint gold glow behind the Bitcoin QR code or countdown)."
+    }
+  },
+  "visual_enhancers": {
+    "textures": "Add a subtle SVG noise/grain overlay (opacity 2-3%) over the entire background to prevent digital flatness and evoke a physical 'museum' or 'editorial print' feel.",
+    "borders": "Use 1px solid borders in border_gold or dark grey (#2A2A2A) to frame content, creating an 'editorial grid' or 'gallery frame' aesthetic.",
+    "surfaces": {
+      "header": "Crystal Glass variant: bg-black/60, backdrop-blur-2xl, border-b border-white/10.",
+      "cards": "Flat solid background (#0F0F0F) with a 1px border (#2A2A2A). No heavy drop shadows. On hover, border transitions to border_gold."
+    }
+  },
+  "grids": {
+    "landing_page": "Mode A: The 'Tetris' Grid. Highly asymmetrical. Large hero image spanning multiple columns, offset text blocks, overlapping elements. Use gap-8 to gap-16.",
+    "application_form": "Centered, narrow, single-column reading flow (max-w-2xl) inside a larger framed container, resembling a physical application document.",
+    "payment_page": "Split layout. Left: The elegant invoice/details. Right: The technical, high-contrast Bitcoin payment terminal."
+  },
+  "layouts": {
+    "spacing": "Generous Spacing Philosophy. Use p-12, p-24, py-32 to create breathing room. Do not cram elements.",
+    "alignment": "Headlines and editorial text should be left-aligned with a strict vertical rhythm. Center alignment only used for the Countdown Timer and final Congratulations message.",
+    "image_constraints": "Images must feel like art pieces. Use aspect-ratio constraints (e.g., 3:4, 4:5, 16:9). Images should not exceed 80vh on mobile."
+  },
+  "motion": {
+    "scrolling": "Implement Lenis for smooth scrolling to give the site a premium, 'heavy' momentum.",
+    "transitions": "Use Framer Motion. Slow, elegant fade-ins and subtle upward translations (y: 20 -> 0) for text and images as they enter the viewport. No bouncy or fast animations.",
+    "hover_states": "Buttons and links should have subtle, smooth color transitions. Images inside grids can have a very slow, slight scale effect (scale-105 over 10s) to feel alive.",
+    "micro_interactions": "The live blockchain monitoring should have a pulsing 'terminal' cursor or a subtle glowing dot to indicate live status."
+  },
+  "accessibility": {
+    "contrast": "Ensure text_secondary (#A1A1A1) on background (#050505) meets minimum 4.5:1 ratio.",
+    "focus": "Focus states must use a 1px solid gold outline.",
+    "testing": "All interactive elements MUST include data-testid attributes (e.g., data-testid='apply-button', data-testid='btc-payment-status')."
+  },
+  "media": {
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1768885560973-454bc193824d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxyZWQlMjBjYXJwZXQlMjBnYWxhfGVufDB8fHx8MTc3NDAzOTc5MHww&ixlib=rb-4.1.0&q=85",
+        "description": "Golden ornate dress on a mannequin. Use as the primary hero background or large hero image on the landing page, blending into the dark theme.",
+        "category": "Hero / Gala"
+      },
+      {
+        "url": "https://images.pexels.com/photos/5825359/pexels-photo-5825359.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Majestic indoor view of museum. Use in the 'History / Condé M. Nast Galleries' section.",
+        "category": "Museum Interior"
+      },
+      {
+        "url": "https://images.pexels.com/photos/5825377/pexels-photo-5825377.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Stunning architectural view inside a historic museum. Use as a parallax background or secondary editorial image.",
+        "category": "Museum Architecture"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1763152608881-67c80e52d0fc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwyfHxyZWQlMjBjYXJwZXQlMjBnYWxhfGVufDB8fHx8MTc3NDAzOTc5MHww&ixlib=rb-4.1.0&q=85",
+        "description": "Woman in pink floral dress. Use in the 'Notable Attendees' or 'Fashion meets Art' gallery section.",
+        "category": "Fashion Editorial"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Install necessary fonts: Cormorant Garamond, Montserrat, JetBrains Mono.",
+    "Install required libraries: lenis (for smooth scrolling), framer-motion (for animations), lucide-react (for elegant, thin icons).",
+    "Design Stage 1 (Landing): Must feel like an editorial magazine. Use the Tetris grid for the history section. The countdown to May 4, 2026 must be massive, using the 'JetBrains Mono' font, centered, with a very subtle gold glow.",
+    "Design Stage 2 (Application Form): Heavily customize Shadcn form components. Make inputs have transparent backgrounds with a bottom 1px gold/dark border only. Remove default Shadcn rounded borders. Use 'Cormorant Garamond' for form section titles.",
+    "Design Stage 3 (Payment): The Bitcoin address and live status must look like a high-end command terminal. Use JetBrains Mono. Show the randomized BTC address prominently with a copy button. Simulate or implement live status polling UI (Waiting for payment... -> Payment detected -> Confirming...).",
+    "Do NOT use generic Shadcn 'Cards' with white backgrounds. Everything must be dark, sleek, and border-driven.",
+    "Ensure the footer 'support@metbrandscout.co' is present on all pages, using a massive typography style or elegant small centered text with massive padding (py-24).",
+    "Apply a global noise overlay using a fixed, pointer-events-none div with an SVG noise pattern to give the site an organic, print-like texture."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. In frontend design, this creates what users call the 'AI slop' aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms.",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style.",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN.",
+    "Prioritize using pre-existing components from src/components/ui when applicable.",
+    "Create new components that match the style and conventions of existing components when needed.",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use sonner for toasts, located in /app/src/components/ui/sonner.tsx"
+  ]
+}
