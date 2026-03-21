@@ -155,10 +155,9 @@ export default function LandingPage() {
                   of dollars for the Costume Institute.
                 </p>
                 <p>
-                  The 2026 gala inaugurates the new <strong className="text-[var(--text-primary)]">Conde M. Nast Galleries</strong>,
-                  celebrating "equivalency" between fashion and high art &mdash; a landmark
-                  moment in the museum's 154-year history, bridging the worlds of haute
-                  couture and fine art within one of the world's greatest cultural institutions.
+                  The 2026 Costume Institute exhibition, launched in conjunction with the Met Gala,
+                  will inaugurate the new <strong className="text-[var(--text-primary)]">Cond&eacute; M. Nast Galleries</strong> at
+                  the Metropolitan Museum of Art.
                 </p>
               </motion.div>
             </div>
