@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Lock } from "lucide-react";
 import axios from "axios";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -23,17 +23,35 @@ const CATEGORIES = [
   "Emerging Designer",
 ];
 
+// Nigeria removed as requested
 const COUNTRIES = [
   "United States", "United Kingdom", "France", "Italy", "Japan",
-  "South Korea", "Nigeria", "Brazil", "India", "China",
+  "South Korea", "Brazil", "India", "China",
   "Australia", "Germany", "Spain", "Canada", "Mexico",
   "South Africa", "UAE", "Sweden", "Netherlands", "Other",
 ];
 
 export default function ApplicationPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Retrieve authenticated brand name
+  const [brand, setBrand] = useState("");
+
+  useEffect(() => {
+    const fromState = location.state?.brand;
+    const fromSession = sessionStorage.getItem("gala_brand");
+    const resolved = fromState || fromSession || "";
+    if (!resolved) {
+      navigate("/", { replace: true });
+      return;
+    }
+    setBrand(resolved);
+    setForm((prev) => ({ ...prev, brand_name: resolved }));
+  }, [location.state, navigate]);
+
   const [form, setForm] = useState({
     brand_name: "",
     brand_email: "",
@@ -48,6 +66,8 @@ export default function ApplicationPage() {
   });
 
   const updateField = (field, value) => {
+    // Prevent editing brand_name — it is locked
+    if (field === "brand_name") return;
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
   };
@@ -86,6 +106,9 @@ export default function ApplicationPage() {
   const inputClass =
     "bg-transparent border-0 border-b border-[var(--border-dark)] rounded-none px-0 py-3 text-[var(--text-primary)] font-body text-sm placeholder:text-[var(--text-secondary)]/40 focus:border-[var(--gold)] focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors duration-300";
 
+  const lockedInputClass =
+    "bg-transparent border-0 border-b border-[var(--border-gold)] rounded-none px-0 py-3 text-[var(--gold)] font-body text-sm focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 cursor-not-allowed select-none tracking-wide";
+
   return (
     <div data-testid="application-page" className="min-h-screen bg-[var(--bg-primary)]">
       <Header />
@@ -102,9 +125,14 @@ export default function ApplicationPage() {
             <p className="text-[var(--gold)] text-xs tracking-[0.3em] uppercase font-body mb-4">
               Step 1 of 2 &middot; Brand Application
             </p>
-            <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-light text-[var(--text-primary)] leading-tight">
+            <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-light text-[var(--text-primary)] leading-tight mb-4">
               Brand <span className="italic text-[var(--gold)]">Registration</span>
             </h1>
+            {brand && (
+              <p className="text-[var(--text-secondary)] text-sm font-body max-w-xl leading-relaxed">
+                <span className="text-[var(--gold)]">{brand}</span>, your identity has been verified and pre-filled below. Complete the remaining fields to submit your application.
+              </p>
+            )}
           </motion.div>
 
           {/* Form Container */}
@@ -115,6 +143,7 @@ export default function ApplicationPage() {
             className="max-w-2xl mx-auto"
           >
             <div className="border border-[var(--border-dark)] bg-[var(--bg-surface)] p-8 md:p-12">
+
               {/* Section: Brand Information */}
               <div className="mb-12">
                 <h3 className="font-heading text-2xl text-[var(--text-primary)] mb-8">
@@ -122,18 +151,30 @@ export default function ApplicationPage() {
                 </h3>
 
                 <div className="space-y-8">
+                  {/* Brand Name — locked */}
                   <div>
                     <Label className="text-[var(--text-secondary)] text-xs tracking-[0.15em] uppercase font-body mb-2 block">
-                      Brand Name *
+                      Brand Name
+                      <span className="ml-3 inline-flex items-center gap-1 text-[var(--gold)] opacity-60">
+                        <Lock className="w-2.5 h-2.5" strokeWidth={1.5} />
+                        <span className="text-[0.55rem] tracking-[0.1em]">Verified &amp; Locked</span>
+                      </span>
                     </Label>
-                    <Input
-                      data-testid="input-brand-name"
-                      className={inputClass}
-                      placeholder="e.g., Maison de Lumiere"
-                      value={form.brand_name}
-                      onChange={(e) => updateField("brand_name", e.target.value)}
-                    />
-                    {errors.brand_name && <p className="text-[var(--error)] text-xs mt-1 font-body">{errors.brand_name}</p>}
+                    <div className="relative">
+                      <Input
+                        data-testid="input-brand-name"
+                        className={lockedInputClass}
+                        value={form.brand_name}
+                        readOnly
+                        tabIndex={-1}
+                        aria-readonly="true"
+                        aria-label="Brand name — pre-filled and locked"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--border-gold)]" />
+                    </div>
+                    <p className="text-[var(--text-secondary)] text-[0.6rem] tracking-[0.1em] uppercase mt-1.5 font-body opacity-50">
+                      Identity authenticated via Gala Gatekeeper
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

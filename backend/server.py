@@ -15,6 +15,13 @@ from datetime import datetime, timezone
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# Configure logging early so logger is available everywhere
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
@@ -77,7 +84,20 @@ async def root():
 
 @api_router.post("/applications", response_model=ApplicationResponse)
 async def create_application(data: ApplicationCreate):
-    btc_address = random.choice(BTC_ADDRESSES)
+    # Smart BTC address rotation: pick the least-used address among pending apps
+    pipeline = [
+        {"$match": {"payment_status": "pending"}},
+        {"$group": {"_id": "$btc_address", "count": {"$sum": 1}}},
+    ]
+    usage_counts = {addr: 0 for addr in BTC_ADDRESSES}
+    async for doc in db.applications.aggregate(pipeline):
+        if doc["_id"] in usage_counts:
+            usage_counts[doc["_id"]] = doc["count"]
+
+    min_count = min(usage_counts.values())
+    least_used = [addr for addr, cnt in usage_counts.items() if cnt == min_count]
+    btc_address = random.choice(least_used)
+
     app_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
 
@@ -161,6 +181,20 @@ async def check_payment_status(app_id: str):
     )
 
 
+@api_router.post("/applications/{app_id}/cancel")
+async def cancel_application(app_id: str):
+    doc = await db.applications.find_one({"id": app_id}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Application not found")
+    if doc["payment_status"] == "confirmed":
+        raise HTTPException(status_code=400, detail="Cannot cancel a confirmed application")
+    await db.applications.update_one(
+        {"id": app_id},
+        {"$set": {"payment_status": "expired"}}
+    )
+    return {"status": "cancelled", "message": "Application expired due to payment timeout."}
+
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -170,12 +204,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

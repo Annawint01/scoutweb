@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { Check, Mail, ArrowLeft, Loader2 } from "lucide-react";
+import { Check, Mail, ArrowLeft, Loader2, Clock, Home } from "lucide-react";
 import axios from "axios";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -60,12 +60,14 @@ export default function ConfirmationPage() {
               transition={{ duration: 1, delay: 0.2 }}
             >
               <p className="text-[var(--gold)] text-xs tracking-[0.3em] uppercase font-body mb-6">
-                Application Complete
+                Registration Successful
               </p>
               <h1 className="font-heading text-4xl sm:text-5xl lg:text-7xl font-light text-[var(--text-primary)] leading-tight mb-6">
-                Welcome to the
+                Congratulations,
                 <br />
-                <span className="italic text-[var(--gold)]">Met Gala 2026</span>
+                <span className="italic text-[var(--gold)]">
+                  {application ? application.brand_name : "Applicant"}
+                </span>
               </h1>
             </motion.div>
 
@@ -77,30 +79,47 @@ export default function ConfirmationPage() {
               className="space-y-6"
             >
               <p className="text-[var(--text-secondary)] text-base md:text-lg font-body leading-relaxed max-w-lg mx-auto">
-                Congratulations{application ? `, ${application.brand_name}` : ""}! Your application
-                has been successfully received and your registration fee has been recorded.
+                Your application to the Met Gala 2026 Brand Scout Program has been
+                successfully submitted and your registration fee has been recorded.
+                Welcome aboard.
               </p>
 
-              <div className="border border-[var(--border-dark)] bg-[var(--bg-surface)] p-8 mt-10">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <Mail className="w-5 h-5 text-[var(--gold)]" strokeWidth={1.5} />
+              {/* What Happens Next */}
+              <div className="border border-[var(--border-dark)] bg-[var(--bg-surface)] p-8 md:p-10 mt-10">
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <Clock className="w-5 h-5 text-[var(--gold)]" strokeWidth={1.5} />
                   <h3 className="text-[var(--text-primary)] text-sm tracking-[0.15em] uppercase font-body font-medium">
-                    Next Steps
+                    What Happens Next
                   </h3>
                 </div>
-                <p className="text-[var(--text-secondary)] text-sm font-body leading-relaxed mb-4">
-                  All further information regarding your participation in the 2026 Met Gala,
-                  including your official invitation, dress code guidelines, event schedule,
-                  and on-site coordination details, will be sent to:
+                <p className="text-[var(--text-secondary)] text-sm font-body leading-relaxed mb-6">
+                  Our curatorial team will now review your application and brand portfolio.
+                  Please allow our team <strong className="text-[var(--text-primary)]">5&ndash;10 business days</strong> to
+                  evaluate your submission. You will receive feedback and further
+                  correspondence regarding your participation directly to:
                 </p>
                 {application && (
-                  <p data-testid="confirmation-email" className="text-[var(--gold)] text-lg font-body font-medium">
+                  <p data-testid="confirmation-email" className="text-[var(--gold)] text-lg font-body font-medium mb-4">
                     {application.brand_email}
                   </p>
                 )}
-                <p className="text-[var(--text-secondary)] text-xs font-body mt-4">
+                <div className="h-px bg-[var(--border-dark)] my-6" />
+                <div className="space-y-3 text-left max-w-md mx-auto">
+                  {[
+                    "Application review by the Met Gala curatorial committee",
+                    "Official invitation and dress code guidelines",
+                    "Event schedule and on-site coordination details",
+                    "Media and press accreditation information",
+                  ].map((step, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <span className="text-[var(--gold)] text-xs font-mono mt-0.5">{String(i + 1).padStart(2, "0")}</span>
+                      <p className="text-[var(--text-secondary)] text-sm font-body">{step}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[var(--text-secondary)] text-xs font-body mt-6">
                   Please ensure your inbox is monitored. Check your spam folder if you
-                  do not receive correspondence within 48 hours.
+                  do not receive correspondence within the stated timeframe.
                 </p>
               </div>
 
@@ -129,10 +148,10 @@ export default function ConfirmationPage() {
                 transition={{ duration: 0.8, delay: 0.8 }}
                 data-testid="back-to-home"
                 onClick={() => navigate("/")}
-                className="group inline-flex items-center gap-3 px-8 py-4 border border-[var(--gold)] text-[var(--gold)] text-xs tracking-[0.2em] uppercase font-body font-medium hover:bg-[var(--gold)] hover:text-[var(--bg-primary)] transition-colors duration-500 mt-6"
+                className="group inline-flex items-center gap-3 px-10 py-5 bg-[var(--gold)] text-[var(--bg-primary)] text-xs tracking-[0.2em] uppercase font-body font-semibold hover:bg-[var(--gold-hover)] transition-colors duration-500 mt-6"
               >
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" />
-                Return to Home
+                <Home className="w-4 h-4" />
+                Return to Homepage
               </motion.button>
             </motion.div>
           </div>

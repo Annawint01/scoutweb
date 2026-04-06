@@ -1,4 +1,4 @@
-{
+
   "theme": "dark",
   "typography": {
     "fonts": {
@@ -32,7 +32,7 @@
       "general": "Dark luxurious theme. No pure blacks (#000000) - use #050505. No purple gradients.",
       "accents": "Use Burnished Gold and Bronze exclusively for borders, thin lines (1px), small text overlines, and primary buttons.",
       "gradients": "Avoid heavy, saturated gradients. If needed, use very subtle radial glows (e.g., a faint gold glow behind the Bitcoin QR code or countdown)."
-    }
+{    }
   },
   "visual_enhancers": {
     "textures": "Add a subtle SVG noise/grain overlay (opacity 2-3%) over the entire background to prevent digital flatness and evoke a physical 'museum' or 'editorial print' feel.",
