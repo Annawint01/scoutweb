@@ -35,7 +35,7 @@ const ACCEPTED_BRANDS = [
   "De Pino", "bettter", "Kallmeyer", "Tolu Coker",
   "Agbobly", "Abra", "Samanta Virginio", "August Barron",
   "Heirlome", "Weise", "Zhadère", "Pierinna Feoli",
-  "GOLSHAAH", "YOSHITA 1967", "Marco Ramboldi",
+  "GOLSHAAH", "YOSHITA 1967", "Marco Rambaldi",
 ];
 
 const normalise = (s) =>
