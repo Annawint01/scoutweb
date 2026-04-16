@@ -12,7 +12,7 @@ const LOG_KEY = "gk_access_log";
 
 const ACCEPTED_BRANDS = [
   // Original 20
-  "Nili Lotan", "Ulla Johnson", "Staud", "Réalisation Par",
+  "Nili Lotan", "Ulla Johnson", "Réalisation Par",
   "Cult Gaia", "Alexis", "L'Agence", "Avec Les Filles",
   "Cinq à Sept", "Vince", "Joie", "Equipment", "Rails",
   "Velvet by Graham & Spencer", "Elan", "Apiece Apart",
